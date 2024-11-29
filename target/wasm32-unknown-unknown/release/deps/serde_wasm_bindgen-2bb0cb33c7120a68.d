@@ -1,0 +1,10 @@
+/home/user/cs4090/centroid-calculator/centroid-calculator/target/wasm32-unknown-unknown/release/deps/libserde_wasm_bindgen-2bb0cb33c7120a68.rmeta: /home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/lib.rs /home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/de.rs /home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/error.rs /home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/ser.rs
+
+/home/user/cs4090/centroid-calculator/centroid-calculator/target/wasm32-unknown-unknown/release/deps/libserde_wasm_bindgen-2bb0cb33c7120a68.rlib: /home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/lib.rs /home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/de.rs /home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/error.rs /home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/ser.rs
+
+/home/user/cs4090/centroid-calculator/centroid-calculator/target/wasm32-unknown-unknown/release/deps/serde_wasm_bindgen-2bb0cb33c7120a68.d: /home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/lib.rs /home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/de.rs /home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/error.rs /home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/ser.rs
+
+/home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/lib.rs:
+/home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/de.rs:
+/home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/error.rs:
+/home/user/.cargo/registry/src/index.crates.io-6f17d22bba15001f/serde-wasm-bindgen-0.2.0/src/ser.rs:
