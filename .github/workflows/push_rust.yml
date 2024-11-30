@@ -1,0 +1,71 @@
+name: Push on Rust Branch
+on:
+  push:
+    branches:
+      - rust
+
+jobs:
+  run-tests:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Create test output file
+        run: echo "$(export RUST_BACKTRACE=1 && cargo test)" > test_output.txt
+      - name: Upload test output file
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: test_output.txt
+      - run: cargo test
+
+  open-issue:
+    needs:
+      - run-tests
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Download test output file
+        uses: actions/download-artifact@v4
+        with:
+          name: test-output
+      - name: Read file into variable
+        uses: guibranco/github-file-reader-action-v2@latest
+        id: read_file
+        with:
+          path: "test_output.txt"
+      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.0
+      - run: gh issue create --title "$TITLE" --assignee "$ASSIGNEES" --body "$BODY"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TITLE: ${{ github.event.head_commit.message }}
+          ASSIGNEES: me11203sci,ZeroQuest
+          BODY: |
+            # Cargo Test Output
+            ---
+            ```sh
+            ${{ steps.read_file.outputs.contents }}
+            ```
+
+  open-pull-request:
+    needs:
+      - run-tests
+    if: ${{ success() }}
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.0
+      - run: gh pr create -B website-development --title "$TITLE" --body "Review carefully before merging." --assignee "$ASSIGNEES" --reviewer "$REVIEWERS"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TITLE: ${{ github.event.head_commit.message }}
+          ASSIGNEES: me11203sci,HankSteelVEVO
+          REVIEWERS: me11203sci,ZeroQuest,HankSteelVEVO
