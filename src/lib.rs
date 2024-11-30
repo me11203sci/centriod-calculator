@@ -21,6 +21,20 @@ impl ShapeBuilder {
         self.lines.push(vec![(start_x, start_y), (end_x, end_y)]);
     }
 
+    pub fn add_rect(&mut self, top_left_x: f64, top_left_y: f64, bottom_right_x: f64, bottom_right_y: f64) {
+        let top_right_x = bottom_right_x;
+        let top_right_y = top_left_y;
+        let bottom_left_x = top_left_x;
+        let bottom_left_y = bottom_right_y;
+
+        self.lines.push(vec![(top_left_x, top_left_y), (top_right_x, top_right_y)]);
+        self.lines.push(vec![(top_right_x, top_right_y), (bottom_right_x, bottom_right_y)]);
+        self.lines.push(vec![(bottom_right_x, bottom_right_y), (bottom_left_x, bottom_left_y)]);
+        self.lines.push(vec![(bottom_left_x, bottom_left_y), (top_left_x, top_left_y)]);
+    }
+
+    
+
     // Calculate the centroid for closed shapes
     pub fn calculate_centroid(&self) -> JsValue {
         let num_points = self.lines.len();
