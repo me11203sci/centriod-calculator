@@ -57,4 +57,4 @@ jobs:
     if: ${{ success() }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Ready to merge"
+      - run: echo "Ready to merge, okay?"
