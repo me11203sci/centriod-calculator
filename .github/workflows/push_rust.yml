@@ -16,7 +16,7 @@ jobs:
       - name: Create test output file
         run: echo "$(cargo test)" > test_output.txt
       - name: Upload test output file
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: test-output
           path: test_output.txt
@@ -32,7 +32,7 @@ jobs:
     steps:
       - name: Download test output file
         id: file
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: test-output
       - run: echo "error_message=$(cat test_output.txt)" >> "$GITHUB_OUTPUT"
