@@ -1,0 +1,10 @@
+[package]
+name = "rust-wasm-centroid-calculator"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+wasm-bindgen = "0.2.96"
+
+[lib]
+crate-type = ["cdylib", "rlib"]

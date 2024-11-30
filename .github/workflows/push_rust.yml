@@ -1,0 +1,60 @@
+name: Push on Rust Branch
+on:
+  push:
+    branches:
+      - rust
+
+jobs:
+  run-tests:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Create test output file
+        run: echo "$(cargo test)" > test_output.txt
+      - name: Upload test output file
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-output
+          path: test_output.txt
+      - run: cargo test
+
+  open-issue:
+    needs:
+      - run-tests
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Download test output file
+        id: file
+        uses: actions/download-artifact@v2
+        with:
+          name: test-output
+        run: echo "error_message=$(cat test_output.txt)" >> "$GITHUB_OUTPUT"
+      - name: Create issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TITLE: ${{ github.event.head_commit.message }}
+          ASSIGNEES: me11203sci,ZeroQuest
+          BODY: |
+            # Cargo Test Output
+            ---
+            ```sh
+            ${{ step.file.outputs.error_message }}
+            ```
+      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.0
+      - run: gh issue create --title "$TITLE" --assignee "$ASSIGNEES" --body "$BODY"
+
+  open-pull-request:
+    needs:
+      - run-tests
+    if: ${{ success() }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Ready to merge"
