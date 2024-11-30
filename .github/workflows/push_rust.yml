@@ -35,7 +35,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: test-output
-        run: echo "error_message=$(cat test_output.txt)" >> "$GITHUB_OUTPUT"
+      - run: echo "error_message=$(cat test_output.txt)" >> "$GITHUB_OUTPUT"
       - name: Create issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -46,9 +46,9 @@ jobs:
             # Cargo Test Output
             ---
             ```sh
-            ${{ step.file.outputs.error_message }}
+            ${{ steps.file.outputs.error_message }}
             ```
-      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.0
+        uses: dev-hanz-ops/install-gh-cli-action@v0.2.0
       - run: gh issue create --title "$TITLE" --assignee "$ASSIGNEES" --body "$BODY"
 
   open-pull-request:
