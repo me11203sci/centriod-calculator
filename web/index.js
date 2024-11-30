@@ -1,11 +1,25 @@
 import init, { ShapeBuilder} from './dist/centroid_calculator.js';
 
+function drawLines(line, ctx) {
+    ctx.beginPath();
+    ctx.moveTo(line[0][0], line[0][1]);
+    ctx.lineTo(line[1][0], line[1][1]);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(line[0][0], line[0][1], 5, 0, Math.PI * 2);
+    ctx.fillStyle = 'black';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(line[1][0], line[1][1], 5, 0, Math.PI * 2);
+    ctx.fillStyle = 'black';
+    ctx.fill();
+}
 
 window.onload = async function() {
   await init(); // Initialize Wasm package
 
   const shapeBuilder = ShapeBuilder.new();
-
+  let lines;
   const canvas = document.getElementById('centroidCanvas');
   if(!canvas) {
     console.error("Canvas not found!");
@@ -18,7 +32,7 @@ window.onload = async function() {
   }
   else { console.log("Context found!")}
   let startX, startY, isDrawing = false;
-
+  
 
   canvas.addEventListener('mousedown', function (e) {
     startX = e.offsetX;
@@ -40,7 +54,6 @@ window.onload = async function() {
 
 
     // Draw all stored lines
-    let lines;
     try {
       lines = JSON.parse(JSON.stringify(shapeBuilder.get_lines()));
       console.log("Lines retrieved:", lines);
@@ -49,12 +62,8 @@ window.onload = async function() {
       lines = [];
     }
 
-
     lines.forEach(line => {
-      ctx.beginPath();
-      ctx.moveTo(line[0][0], line[0][1]);
-      ctx.lineTo(line[1][0], line[1][1]);
-      ctx.stroke();
+      drawLines(line, ctx);
     });
 
     // Draw the current line being drawn
@@ -62,6 +71,14 @@ window.onload = async function() {
     ctx.moveTo(startX, startY);
     ctx.lineTo(endX, endY);
     ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(startX, startY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = 'black';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(endX, endY, 5, 0, Math.PI * 2);
+    ctx.fillStyle = 'black';
+    ctx.fill();
   }); 
 
   canvas.addEventListener('mouseup', function (e) {
@@ -89,8 +106,13 @@ window.onload = async function() {
     // Add the line to the shape 
     shapeBuilder.add_line(startX, startY, endX, endY);
     
+    //redraws any lines
+    lines = JSON.parse(JSON.stringify(shapeBuilder.get_lines()));
+    lines.forEach(line => {
+      drawLines(line, ctx);
+    });
+
     console.log("ShapeBuilder state:", shapeBuilder);
-    let lines;
     try {
         lines = JSON.parse(JSON.stringify(shapeBuilder.get_lines()));
         console.log("Lines retrieved after adding line:", lines);
