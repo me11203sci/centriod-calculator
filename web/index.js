@@ -4,7 +4,7 @@ import init, { ShapeBuilder} from './dist/centroid_calculator.js';
 window.onload = async function() {
   await init(); // Initialize Wasm package
 
-  const shapeBuilder = new ShapeBuilder();
+  const shapeBuilder = ShapeBuilder.new();
 
   const canvas = document.getElementById('centroidCanvas');
   if(!canvas) {
@@ -42,7 +42,7 @@ window.onload = async function() {
     // Draw all stored lines
     let lines;
     try {
-      lines = JSON.parse(shapeBuilder.get_lines());
+      lines = JSON.parse(JSON.stringify(shapeBuilder.get_lines()));
       console.log("Lines retrieved:", lines);
     } catch (err) {
       console.error("Error retrieving lines:", err)
@@ -92,7 +92,7 @@ window.onload = async function() {
     console.log("ShapeBuilder state:", shapeBuilder);
     let lines;
     try {
-        lines = JSON.parse(shapeBuilder.get_lines());
+        lines = JSON.parse(JSON.stringify(shapeBuilder.get_lines()));
         console.log("Lines retrieved after adding line:", lines);
     } catch (err) {
         console.error("Error retrieving lines after adding:", err);
@@ -116,7 +116,7 @@ window.onload = async function() {
 
     // Check if the shape is closed 
     if (shapeBuilder.get_lines().length >= 3) {
-      const lines = JSON.parse(shapeBuilder.get_lines());
+      const lines = JSON.parse(JSON.stringify(shapeBuilder.get_lines()));
       const firstLine = lines[0];
       const lastLine = lines[lines.length - 1];
 
