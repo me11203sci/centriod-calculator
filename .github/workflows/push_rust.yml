@@ -35,6 +35,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: test-output
+      - run: cat test_output.txt
       - run: echo "error_message=$(cat test_output.txt)" >> "$GITHUB_OUTPUT"
       - name: Create issue
         env:
