@@ -34,6 +34,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: test-output
+      - name: Read file into variable
         uses: guibranco/github-file-reader-action-v2@latest
         id: read_file
         with:
@@ -48,7 +49,7 @@ jobs:
             # Cargo Test Output
             ---
             ```sh
-            ${{ steps.red_file.outputs.contents }}
+            ${{ steps.read_file.outputs.contents }}
             ```
         uses: dev-hanz-ops/install-gh-cli-action@v0.2.0
       - run: gh issue create --title "$TITLE" --assignee "$ASSIGNEES" --body "$BODY"
