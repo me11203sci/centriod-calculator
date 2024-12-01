@@ -14,10 +14,8 @@ jobs:
         with:
           toolchain: stable
       - name: Create test output file
-        run: echo "$(cargo test)" > test_output.txt
+        run: echo "$(export RUST_BACKTRACE=1 && cargo test)" > test_output.txt
       - name: Upload test output file
-        env:
-          RUST_BACKTRACE: 1
         uses: actions/upload-artifact@v4
         with:
           name: test-output
@@ -60,5 +58,14 @@ jobs:
       - run-tests
     if: ${{ success() }}
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
-      - run: echo "Ready to merge, okay?"
+      - uses: actions/checkout@v4
+      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.0
+      - run: gh pr create -B web-development --title "$TITLE" --body "Review carefully before merging." --assignee "$ASSIGNEES" -reviewer "$REVIEWERS"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TITLE: ${{ github.event.head_commit.message }}
+          ASSIGNEES: me11203sci,ZeroQuest
+          REVIEWERS: me11203sci,ZeroQuest,HankSteelVEVO
