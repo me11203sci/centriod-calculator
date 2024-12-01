@@ -16,6 +16,8 @@ jobs:
       - name: Create test output file
         run: echo "$(cargo test)" > test_output.txt
       - name: Upload test output file
+        env:
+          RUST_BACKTRACE: 1
         uses: actions/upload-artifact@v4
         with:
           name: test-output
@@ -39,7 +41,8 @@ jobs:
         id: read_file
         with:
           path: "test_output.txt"
-      - name: Create issue
+      - uses: dev-hanz-ops/install-gh-cli-action@v0.2.0
+      - run: gh issue create --title "$TITLE" --assignee "$ASSIGNEES" --body "$BODY"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
@@ -51,8 +54,6 @@ jobs:
             ```sh
             ${{ steps.read_file.outputs.contents }}
             ```
-        uses: dev-hanz-ops/install-gh-cli-action@v0.2.0
-      - run: gh issue create --title "$TITLE" --assignee "$ASSIGNEES" --body "$BODY"
 
   open-pull-request:
     needs:
