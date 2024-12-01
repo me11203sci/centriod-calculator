@@ -31,12 +31,13 @@ jobs:
       issues: write
     steps:
       - name: Download test output file
-        id: file
         uses: actions/download-artifact@v4
         with:
           name: test-output
-      - run: cat test_output.txt
-      - run: echo "error_message=$(cat test_output.txt)" >> "$GITHUB_OUTPUT"
+        uses: guibranco/github-file-reader-action-v2@latest
+        id: read_file
+        with:
+          path: "test_output.txt"
       - name: Create issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -47,7 +48,7 @@ jobs:
             # Cargo Test Output
             ---
             ```sh
-            ${{ steps.file.outputs.error_message }}
+            ${{ steps.red_file.outputs.contents }}
             ```
         uses: dev-hanz-ops/install-gh-cli-action@v0.2.0
       - run: gh issue create --title "$TITLE" --assignee "$ASSIGNEES" --body "$BODY"
