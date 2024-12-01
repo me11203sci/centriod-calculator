@@ -32,7 +32,6 @@ window.onload = async function() {
   }
   else { console.log("Context found!")}
   let startX, startY, isDrawing = false;
-<<<<<<< Updated upstream
   
 
   canvas.addEventListener('mousedown', function (e) {
@@ -40,7 +39,6 @@ window.onload = async function() {
     startY = e.offsetY;
     isDrawing = true;
     console.log("Mouse down:", startX, startY);
-=======
   let rectStartX, rectStartY = false;
 
 
@@ -163,7 +161,6 @@ window.onload = async function() {
         }
       });
     }
->>>>>>> Stashed changes
   });
 
   canvas.addEventListener('mousemove', function (e) {
@@ -181,14 +178,11 @@ window.onload = async function() {
     // Draw all stored lines
     try {
       lines = JSON.parse(JSON.stringify(shapeBuilder.get_lines()));
-<<<<<<< Updated upstream
       console.log("Lines retrieved:", lines);
-=======
       lines.forEach(line => {
         drawLine(line, ctx);
       });
       //console.log("Lines retrieved:", lines);
->>>>>>> Stashed changes
     } catch (err) {
       console.error("Error retrieving lines:", err)
       lines = [];
@@ -198,7 +192,6 @@ window.onload = async function() {
       drawLines(line, ctx);
     });
 
-<<<<<<< Updated upstream
     // Draw the current line being drawn
     ctx.beginPath();
     ctx.moveTo(startX, startY);
@@ -212,7 +205,6 @@ window.onload = async function() {
     ctx.arc(endX, endY, 5, 0, Math.PI * 2);
     ctx.fillStyle = 'black';
     ctx.fill();
-=======
     if (currentTool === 'drawRect') {
       // Draw the current rectangle
       ctx.beginPath();
@@ -258,7 +250,6 @@ window.onload = async function() {
       });
     }
 
->>>>>>> Stashed changes
   }); 
 
   canvas.addEventListener('mouseup', function (e) {
@@ -291,7 +282,6 @@ window.onload = async function() {
     lines.forEach(line => {
       drawLines(line, ctx);
     });
-<<<<<<< Updated upstream
 
     console.log("ShapeBuilder state:", shapeBuilder);
     try {
@@ -301,7 +291,6 @@ window.onload = async function() {
         console.error("Error retrieving lines after adding:", err);
         lines = [];
     }
-=======
     console.log("Lines retrieved:", lines);
     // Reset Coordinates after drawing.
     rectStartX = null;
@@ -317,7 +306,6 @@ window.onload = async function() {
       //drawVertex(endX, endY, ctx);             // Bottom-right
     //}    
   });
->>>>>>> Stashed changes
 
     // Calculate the centroid if a shape is closed
     const centroid = shapeBuilder.calculate_centroid();
