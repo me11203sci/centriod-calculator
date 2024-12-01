@@ -40,15 +40,25 @@ impl ShapeBuilder {
         //With the way line intersection works, which is way more complicated than we anticipated, a check for collinearity and resolving any instances of that followed by a check for intersection and resolving of that. Like dude think about how many edge cases there are it's actually insane
         let mut lines_to_delete = Vec::new();
         let mut lines_to_add = Vec::new();
+        let mut lines_to_process: Vec<Vec<(f64, f64)>> = Vec::new(); // Track lines to be processed
+
         //Checks for collinearity
-        for line in self.lines.iter_mut() {
+        for line in &self.lines {
+
+            if line.len() < 2 {
+                continue;  // Skip lines that don't have two points
+            } 
+
             let b1x: f64 = line[0].0;
             let b1y: f64 = line[0].1;
             let b2x: f64 = line[1].0;
             let b2y: f64 = line[1].1;
+
             let mut cx: f64 = f64::INFINITY;
             let mut cy: f64 = f64::INFINITY;
+            
             get_intersection(start_x, start_y, end_x, end_y, b1x, b1y, b2x, b2y, &mut cx, &mut cy);
+            
             if cx == f64::NEG_INFINITY && cy == f64::NEG_INFINITY {
                 let mut longest_x = 0.0;
                 let mut longest_y = 0.0;
@@ -56,6 +66,7 @@ impl ShapeBuilder {
                 let mut d1y = 0.0;
                 let mut d2x = 0.0;
                 let mut d2y = 0.0;
+
                 if (start_x - b1x).abs() > longest_x && (start_y - b1y).abs() > longest_y {
                     d1x = start_x;
                     d1y = start_y;
@@ -72,92 +83,85 @@ impl ShapeBuilder {
                     longest_x = (d1x - d2x).abs();
                     longest_y = (d1y - d2y).abs();
                 }
-                if (start_x - b2x).abs() > longest_x && (start_y - b2y).abs() > longest_y {
-                    d1x = start_x;
-                    d1y = start_y;
-                    d2x = b2x;
-                    d2y = b2y;
-                    longest_x = (d1x - d2x).abs();
-                    longest_y = (d1y - d2y).abs();
-                }
-                if (end_x - b2x).abs() > longest_x && (end_y - b2y).abs() > longest_y {
-                    d1x = end_x;
-                    d1y = end_y;
-                    d2x = b2x;
-                    d2y = b2y;
-                }
+               
                 //gets rid of old line
                 lines_to_delete.push(vec![(start_x, start_y), (end_x, end_y)]);
                 lines_to_delete.push(vec![(b1x, b1y), (b2x, b2y)]);
+
                 //adds back the collinear combined line
                 if d1x != d2x && d1y != d2y {
                     lines_to_add.push(vec![(d1x, d1y), (d2x, d2y)]);
                 }
             }
         }
+
         for line in lines_to_delete {
             self.delete_line(line[0].0, line[0].1, line[1].0, line[1].1);
         }
-        for line in lines_to_add {
-            self.lines.push(line);
+
+        for line in &lines_to_add {
+            if !self.lines.contains(line) {
+                self.lines.push(line.clone());  // Add only if not already present
+            }
         }
+
         lines_to_delete = vec![];
         lines_to_add = vec![];
+
         //Checks for intersections
-        let mut noInt = false;
-        let mut b1x: f64 = 0.0;
-        let mut b1y: f64 = 0.0;
-        let mut b2x: f64 = 0.0;
-        let mut b2y: f64 = 0.0;
-        let mut cx: f64 = f64::INFINITY;
-        let mut cy: f64 = f64::INFINITY;
-        for line in self.lines.iter_mut() {
-            b1x = line[0].0;
-            b1y = line[0].1;
-            b2x = line[1].0;
-            b2y = line[1].1;
-            cx = f64::INFINITY;
-            cy = f64::INFINITY;
+        let mut noInt = true;
+        let mut last_intersection = (f64::INFINITY, f64::INFINITY);
+        let mut lines_split = Vec::new(); // Track which lines have been split
+        
+        for line in self.lines.iter() {
+            let b1x = line[0].0;
+            let b1y = line[0].1;
+            let b2x = line[1].0;
+            let b2y = line[1].1;
+            
+            let mut cx = f64::INFINITY;
+            let mut cy = f64::INFINITY;
+            
             get_intersection(start_x, start_y, end_x, end_y, b1x, b1y, b2x, b2y, &mut cx, &mut cy);
+            
             if (cx != f64::INFINITY && cx != f64::NEG_INFINITY && cy != f64::INFINITY && cy != f64::NEG_INFINITY){ 
                 //intersection!
-                break;
+                noInt = false;
+                last_intersection = (cx, cy);
+                lines_split.push((b1x, b1y, b2x, b2y, cx, cy));
             }
-            noInt = true;
         }
-        if self.lines.iter_mut().len() == 0 {
-            noInt = true;
-        }
+
         //no intersections (fix)
-        if noInt == true {
+        if noInt {
             lines_to_add.push(vec![(start_x, start_y), (end_x, end_y)]);
         }
         else {
-            if b1x != cx && b1y != cy {
+            let (cx, cy) = last_intersection;
+
+            // Process each line that was split
+            for (b1x, b1y, b2x, b2y, cx, cy) in lines_split {
+                lines_to_delete.push(vec![(b1x, b1y), (b2x, b2y)]);
                 lines_to_add.push(vec![(b1x, b1y), (cx, cy)]);
-            }
-            if b2x != cx && b2y != cy {
                 lines_to_add.push(vec![(cx, cy), (b2x, b2y)]);
             }
-            lines_to_delete.push(vec![(b1x, b1y), (b2x, b2y)]);
-            if (start_x != cx && start_y != cy) && (end_x != cx && end_y != cy){
-                self.add_line(start_x, start_y, cx, cy);
-                self.add_line(cx, cy, end_x, end_y);
-            }
+
+            // Check for the new line intersections with the original
             lines_to_delete.push(vec![(start_x, start_y), (end_x, end_y)]);
-            else if (((start_x == cx && start_y == cy) && (end_x != cx || end_y != cy)) || ((start_x != cx || start_y != cy) && (end_x == cx && end_y == cy))){
-                lines_to_add.push(vec![(start_x, start_y), (end_x, end_y)]);
-            }
-            
+            lines_to_add.push(vec![(start_x, start_y), (cx, cy)]);
+            lines_to_add.push(vec![(cx, cy), (end_x, end_y)]);   
         }
+         
+        // Step 3: Delete old lines and add new ones
         for line in lines_to_delete {
             self.delete_line(line[0].0, line[0].1, line[1].0, line[1].1);
         }
         for line in lines_to_add {
             self.lines.push(line);
         }
-        return;
+
     }
+
     // Calculate the centroid for closed shapes
     pub fn calculate_centroid(&self) -> JsValue {
         let num_points = self.lines.len();
