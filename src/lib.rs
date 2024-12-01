@@ -168,10 +168,10 @@ impl ShapeBuilder {
         let bottom_left_x = top_left_x;
         let bottom_left_y = bottom_right_y;
 
-        self.lines.push(vec![(top_left_x, top_left_y), (top_right_x, top_right_y)]);
-        self.lines.push(vec![(top_right_x, top_right_y), (bottom_right_x, bottom_right_y)]);
-        self.lines.push(vec![(bottom_right_x, bottom_right_y), (bottom_left_x, bottom_left_y)]);
-        self.lines.push(vec![(bottom_left_x, bottom_left_y), (top_left_x, top_left_y)]);
+        self.add_line(top_left_x, top_left_y, top_right_x, top_right_y);
+        self.add_line(top_right_x, top_right_y, bottom_right_x, bottom_right_y);
+        self.add_line(bottom_right_x, bottom_right_y, bottom_left_x, bottom_left_y);
+        self.add_line(bottom_left_x, bottom_left_y, top_left_x, top_left_y);
     }
 
     
