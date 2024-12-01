@@ -13,6 +13,7 @@ pub struct ShapeBuilder {
 extern "C" {
     #[wasm_bindgen(js_namespace = console, js_name = log)]
         fn log(s: &str);
+        //log a vector to console: log(&format!("{:?}", line));
     
     #[wasm_bindgen(js_namespace = console, js_name = log)]
         fn log_usize(a: usize);
@@ -29,8 +30,8 @@ impl ShapeBuilder {
     }
 
     pub fn delete_line(&mut self, a1x: f64, a1y: f64, a2x: f64, a2y: f64) {
-        let oldLineA = vec![(a1x, a1y), (a2x, a2x)];
-        let oldLineB = vec![(a2x, a2y), (a1x, a1x)];
+        let oldLineA = vec![(a1x, a1y), (a2x, a2y)];
+        let oldLineB = vec![(a2x, a2y), (a1x, a1y)];
         self.lines.retain(|line| *line != oldLineA);
         self.lines.retain(|line| *line != oldLineB);
     }
@@ -89,7 +90,7 @@ impl ShapeBuilder {
                 lines_to_delete.push(vec![(b1x, b1y), (b2x, b2y)]);
 
                 //adds back the collinear combined line
-                if d1x != d2x && d1y != d2y {
+                if d1x != d2x || d1y != d2y {
                     lines_to_add.push(vec![(d1x, d1y), (d2x, d2y)]);
                 }
             }
@@ -99,9 +100,10 @@ impl ShapeBuilder {
             self.delete_line(line[0].0, line[0].1, line[1].0, line[1].1);
         }
 
+        // Makes sure no points or duplicate lines are added
         for line in &lines_to_add {
-            if !self.lines.contains(line) {
-                self.lines.push(line.clone());  // Add only if not already present
+            if (line[0].0 != line[1].0 || line[0].1 != line[1].1) && !self.lines.contains(&vec![(line[0].0, line[0].1),(line[1].0, line[1].1)]) && !self.lines.contains(&vec![(line[1].0, line[1].1),(line[0].0, line[0].1)]){
+                self.lines.push(line.clone());
             }
         }
 
@@ -110,9 +112,9 @@ impl ShapeBuilder {
 
         //Checks for intersections
         let mut noInt = true;
-        let mut last_intersection = (f64::INFINITY, f64::INFINITY);
+        let mut intersections = Vec::new(); //Track where intersections lie on original line
         let mut lines_split = Vec::new(); // Track which lines have been split
-        
+        intersections.push((start_x, start_y));
         for line in self.lines.iter() {
             let b1x = line[0].0;
             let b1y = line[0].1;
@@ -127,7 +129,7 @@ impl ShapeBuilder {
             if (cx != f64::INFINITY && cx != f64::NEG_INFINITY && cy != f64::INFINITY && cy != f64::NEG_INFINITY){ 
                 //intersection!
                 noInt = false;
-                last_intersection = (cx, cy);
+                intersections.push((cx, cy));
                 lines_split.push((b1x, b1y, b2x, b2y, cx, cy));
             }
         }
@@ -137,7 +139,7 @@ impl ShapeBuilder {
             lines_to_add.push(vec![(start_x, start_y), (end_x, end_y)]);
         }
         else {
-            let (cx, cy) = last_intersection;
+            //let (cx, cy) = last_intersection;
 
             // Process each line that was split
             for (b1x, b1y, b2x, b2y, cx, cy) in lines_split {
@@ -146,18 +148,24 @@ impl ShapeBuilder {
                 lines_to_add.push(vec![(cx, cy), (b2x, b2y)]);
             }
 
-            // Check for the new line intersections with the original
+            // Split original line into all subsections
             lines_to_delete.push(vec![(start_x, start_y), (end_x, end_y)]);
-            lines_to_add.push(vec![(start_x, start_y), (cx, cy)]);
-            lines_to_add.push(vec![(cx, cy), (end_x, end_y)]);   
+            intersections.push((end_x, end_y));
+            for i in 0..(intersections.len() - 1) {
+                lines_to_add.push(vec![(intersections[i].0, intersections[i].1), (intersections[i+1].0, intersections[i+1].1)]);
+            }
         }
          
         // Step 3: Delete old lines and add new ones
         for line in lines_to_delete {
             self.delete_line(line[0].0, line[0].1, line[1].0, line[1].1);
+            
         }
-        for line in lines_to_add {
-            self.lines.push(line);
+        // Makes sure no points or duplicate lines are added
+        for line in &lines_to_add {
+            if (line[0].0 != line[1].0 || line[0].1 != line[1].1) && !self.lines.contains(&vec![(line[0].0, line[0].1),(line[1].0, line[1].1)]) && !self.lines.contains(&vec![(line[1].0, line[1].1),(line[0].0, line[0].1)]){
+                self.lines.push(line.clone());
+            }
         }
 
     }
