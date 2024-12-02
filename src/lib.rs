@@ -174,6 +174,18 @@ impl ShapeBuilder {
 
     }
 
+    pub fn add_rect(&mut self, top_left_x: f64, top_left_y: f64, bottom_right_x: f64, bottom_right_y: f64) {
+        let top_right_x = bottom_right_x;
+        let top_right_y = top_left_y;
+        let bottom_left_x = top_left_x;
+        let bottom_left_y = bottom_right_y;
+
+        self.add_line(top_left_x, top_left_y, top_right_x, top_right_y);
+        self.add_line(top_right_x, top_right_y, bottom_right_x, bottom_right_y);
+        self.add_line(bottom_right_x, bottom_right_y, bottom_left_x, bottom_left_y);
+        self.add_line(bottom_left_x, bottom_left_y, top_left_x, top_left_y);
+    }
+    
     // Calculate the centroid for closed shapes
     pub fn calculate_centroid(&self) -> JsValue {
         let num_points = self.lines.len();
