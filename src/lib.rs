@@ -126,7 +126,7 @@ impl ShapeBuilder {
             
             get_intersection(start_x, start_y, end_x, end_y, b1x, b1y, b2x, b2y, &mut cx, &mut cy);
             
-            if (cx != f64::INFINITY && cx != f64::NEG_INFINITY && cy != f64::INFINITY && cy != f64::NEG_INFINITY){ 
+            if cx != f64::INFINITY && cx != f64::NEG_INFINITY && cy != f64::INFINITY && cy != f64::NEG_INFINITY { 
                 //intersection!
                 noInt = false;
                 intersections.push((cx, cy));
@@ -139,8 +139,6 @@ impl ShapeBuilder {
             lines_to_add.push(vec![(start_x, start_y), (end_x, end_y)]);
         }
         else {
-            //let (cx, cy) = last_intersection;
-
             // Process each line that was split
             for (b1x, b1y, b2x, b2y, cx, cy) in lines_split {
                 lines_to_delete.push(vec![(b1x, b1y), (b2x, b2y)]);
@@ -151,6 +149,12 @@ impl ShapeBuilder {
             // Split original line into all subsections
             lines_to_delete.push(vec![(start_x, start_y), (end_x, end_y)]);
             intersections.push((end_x, end_y));
+            if start_x < end_x {
+                intersections.sort_by(|a, b| a.0.partial_cmp(&b.0).expect("REASON"));
+            }
+            else {
+                intersections.sort_by(|a, b| b.0.partial_cmp(&a.0).expect("REASON"));
+            }
             for i in 0..(intersections.len() - 1) {
                 lines_to_add.push(vec![(intersections[i].0, intersections[i].1), (intersections[i+1].0, intersections[i+1].1)]);
             }

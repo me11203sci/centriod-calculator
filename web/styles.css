@@ -1,0 +1,64 @@
+/* Styling for the body and canvas container */ 
+body {
+  display: flex;
+  /*flex-direction: row; */
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+#canvas-container {
+  margin-left: 220px; /* Space for the sidebar */ 
+  padding: 20px;
+  flex-grow: 1; /* Ensures the canvas container takes up remaining space */vmlinuz
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Styling for the toolbar (sidebar) */ 
+#toolbar {
+  width: 200px;
+  height: 100vh;
+  background-color: #f4f4f4;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: 1fr; /* one column */
+  grid-gap: 5px; /* space between the buttons */
+  padding: 10px;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  align-items: start;
+  overflow-y: auto;
+}
+
+/* Styling for each tool button */ 
+.tool-button {
+  padding: 4px 8px;
+  font-size: 16px;
+  cursor: pointer;
+  border: 2px solid #ccc;
+  background-color: #fff;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s, color 0.3s;
+  text-align: center;
+  white-space: nowrap;
+  align-self: start;
+  margin: 0;
+  width: 100%;
+}
+
+/* Style for the active button */ 
+.tool-button.active {
+  background-color: #A9A9A9;
+  color: white;
+  border-color: #A9A9A9;
+}
+
+/* Hover effect for buttons */ 
+.tool-button:hover {
+  background-color: #ddd
+}
