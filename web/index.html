@@ -10,12 +10,31 @@
   <body>
     <! --- Toolbar Implementation -->
     <div id="toolbar" class="toolbar">
-      <button id="selectButton" class="tool-button">Select</button>
-      <button id="drawLineButton" class="tool-button">Draw Line</button>
-      <button id="rectangleButton" class="tool-button">Draw Rectangle</button>
-      <button id="calculateCentroidButton" class="tool-button">Calculate Centroid</button>
-      <button id="deleteLineButton" class="tool-button">Delete Line</button>
-      <button id="clearButton" class="tool-button">Clear Shape</button>
+      <img id="main_icon" src="icons/mainIcon.png"></img>
+      <hr>
+      <button id="selectButton" class="tool-button" onclick="buttonPress('select')">Select</button>
+      <button id="drawLineButton" class="tool-button" onclick="buttonPress('drawLine')">Draw Line</button>
+      <div id="line_text">
+        <input type="text" id = "linePoint1" class="line_textbox" placeholder="Point 1: (x1, y1)">
+        <input type="text" id = "linePoint2" class="line_textbox" placeholder="Point 2: (x2, y2)">
+        <button id="drawNumLineButton" class="submit_button">Draw</button>
+      </div>
+      <button id="rectangleButton" class="tool-button" onclick="buttonPress('rectangle')">Draw Rectangle</button>
+      <div id="rect_text">
+        <input type="text" id = "rectPoint1" class="rect_textbox" placeholder="Top left corner: (x1, y1)">
+        <input type="text" id = "rectW" class="rect_textbox_small" placeholder="Width">
+        <input type="text" id = "rectH" class="rect_textbox_small" placeholder="Height">
+        <button id="drawNumRectButton" class="submit_button">Draw</button>
+      </div>
+      <button id="calculateCentroidButton" class="tool-button" onclick="buttonPress('centroid')">Calculate Centroid</button>
+      <button id="deleteLineButton" class="tool-button" onclick="buttonPress('delete')">Delete Line</button>
+      <button id="clearButton" class="tool-button" onclick="buttonPress('clear')">Clear Shape</button>
+      <hr>
+      <div id="info_text">
+        <h2 id="title_text">Select Tool</h2>
+        <img id="info_image" src="icons/select.png"></img>
+        <h4 id="description_text">This tool allows the user to manipulate the grid to better suit their needs. Zoom in and out by scrolling, click and drag to shift the grid, and hover over a point or line to highlight it and display it's position or length respectively.</h4>
+      </div>
     </div>
 
     <! --- Canvas Implementation -->
@@ -25,4 +44,64 @@
       <h2>Developed by Melesio Albavera, Tim Stokes, and Kaleb Kruse</h2>
     </div>
   </body>
+  <script>
+    function buttonPress(button) {
+      let information = {
+        select: ["Select Tool", "This tool allows the user to manipulate the grid to better suit their needs. Zoom in and out by scrolling, click and drag to shift the grid, and hover over a point or line to highlight it and display it's position or length respectively.", "icons/select.png"],
+        drawLine : ["Line Tool", "This tool allows the user to draw lines on the grid. Lines can be drawn either by clicking and drawing on the grid with the cursor, or by entering numerical input in the toolbar.", "icons/drawLine.png"], 
+        rectangle : ["Rectangle Tool", "This tool allows the user to draw rectangles on the grid. Rectangles can be drawn either by clicking and drawing on the grid with the cursor, or by entering numerical input in the toolbar.", "icons/drawRect.png"],
+        centroid : ["Centroid Calculator", "This tool allows the user to compute the centroid of a drawn shape. Once the shape is drawn, simply select the Calculate Centroid tool in the toolbar to receive the value.", "icons/centroid.png"],
+        delete : ["Delete Tool", "This tool allows the user to delete any lines that were previously drawn on the grid. Hover over any line to be deleted to highlight it, and click to delete the highlighted line.", "icons/deleteLine.png"]
+      };
+      if (button != "clear") {
+        document.getElementById("info_text").style.opacity = 0;
+        setTimeout(() => {
+          document.getElementById("title_text").textContent = information[button][0];
+          document.getElementById("info_image").src = information[button][2];
+          document.getElementById("description_text").textContent = information[button][1];
+          document.getElementById("info_text").style.opacity = 1;
+        }, 500);
+        
+      }
+      const lineTextboxes = document.getElementById('line_text');
+      const rectTextboxes = document.getElementById('rect_text');
+      if (lineTextboxes.style.display != 'block' && button == 'drawLine') {
+        let delay = 0;
+        if (rectTextboxes.style.display == 'block'){
+          delay = 500
+        }
+        setTimeout(() => {
+          lineTextboxes.style.display = 'block';
+          setTimeout(() => {
+            lineTextboxes.style.opacity = 1;
+          }, 10);
+        }, delay);
+        
+      }
+      else if (button != 'clear') {
+          lineTextboxes.style.opacity = 0;
+          setTimeout(() => {
+            lineTextboxes.style.display = 'none';
+          }, 500);
+        }
+      if (rectTextboxes.style.display != 'block' && button == 'rectangle') {
+        let delay = 0;
+        if (lineTextboxes.style.display == 'block'){
+          delay = 500
+        }
+        setTimeout(() => {
+          rectTextboxes.style.display = 'block';
+          setTimeout(() => {
+            rectTextboxes.style.opacity = 1;
+          }, 10);
+        }, delay);
+      }
+      else if (button != 'clear') {
+        rectTextboxes.style.opacity = 0;
+        setTimeout(() => {
+          rectTextboxes.style.display = 'none';
+        }, 500);
+      }
+    }
+  </script>
 </html>

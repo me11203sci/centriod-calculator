@@ -9,10 +9,10 @@ body {
 #canvas-container {
   margin-left: 220px; /* Space for the sidebar */ 
   padding: 20px;
-  flex-grow: 1; /* Ensures the canvas container takes up remaining space */vmlinuz
-  display: flex;
+  flex-grow: 1; /* Ensures the canvas container takes up remaining space */
+  /*display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center;*/
 }
 
 /* Styling for the toolbar (sidebar) */ 
@@ -49,6 +49,88 @@ body {
   align-self: start;
   margin: 0;
   width: 100%;
+}
+
+#main_icon {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Styling for the line draw text boxes */
+#line_text {
+  display: none;
+  margin-top: 5px;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+.line_textbox {
+  margin-bottom: 10px;
+  padding: 4px 8px;
+  margin-right: 10px;
+  width: 80%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.submit_button {
+  margin-bottom: 10px;
+  padding: 4px 8px;
+  margin-right: 10px;
+  width: 50%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  
+}
+
+.submit_button:hover {
+  background-color: #ddd;
+  transition: background-color 0.3s;
+}
+
+/* Styling for the rect draw text boxes */
+#rect_text {
+  display: none;
+  margin-top: 5px;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+.rect_textbox {
+  margin-bottom: 10px;
+  padding: 4px 8px;
+  margin-right: 10px;
+  width: 80%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.rect_textbox_small {
+  margin-bottom: 10px;
+  padding: 4px 8px;
+  margin-right: 10px;
+  width: 33%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  float: left;
+}
+
+/* Styling for the information */
+#info_text {
+  margin-top: 0;
+  text-align: center;
+  opacity: 100;
+  transition: opacity 0.5s ease-in-out;
+}
+
+hr {
+  border: 0;
+  clear:both;
+  display:block;
+  width: 96%;               
+  background-color:#555;
+  height: 2px;
+}
+
+#info_image {
+  border: 3px solid #555;
 }
 
 /* Style for the active button */ 

@@ -37,7 +37,7 @@ impl ShapeBuilder {
     }
 
     // Add a line to the Shape, handles intersection as well 
-    pub fn add_line(&mut self, start_x: f64, start_y: f64, end_x: f64, end_y: f64) {
+    pub fn add_line(&mut self, mut start_x: f64, mut start_y: f64, mut end_x: f64, mut end_y: f64) {
         //With the way line intersection works, which is way more complicated than we anticipated, a check for collinearity and resolving any instances of that followed by a check for intersection and resolving of that. Like dude think about how many edge cases there are it's actually insane
         let mut lines_to_delete = Vec::new();
         let mut lines_to_add = Vec::new();
@@ -68,7 +68,7 @@ impl ShapeBuilder {
                 let mut d2x = 0.0;
                 let mut d2y = 0.0;
 
-                if (start_x - b1x).abs() > longest_x && (start_y - b1y).abs() > longest_y {
+                if (start_x - b1x).abs() >= longest_x && (start_y - b1y).abs() >= longest_y {
                     d1x = start_x;
                     d1y = start_y;
                     d2x = b1x;
@@ -76,7 +76,7 @@ impl ShapeBuilder {
                     longest_x = (d1x - d2x).abs();
                     longest_y = (d1y - d2y).abs();
                 }
-                if (end_x - b1x).abs() > longest_x && (end_y - b1y).abs() > longest_y {
+                if (end_x - b1x).abs() >= longest_x && (end_y - b1y).abs() >= longest_y {
                     d1x = end_x;
                     d1y = end_y;
                     d2x = b1x;
@@ -85,28 +85,18 @@ impl ShapeBuilder {
                     longest_y = (d1y - d2y).abs();
                 }
                
-                //gets rid of old line
+                //gets rid of old lines
                 lines_to_delete.push(vec![(start_x, start_y), (end_x, end_y)]);
                 lines_to_delete.push(vec![(b1x, b1y), (b2x, b2y)]);
-
-                //adds back the collinear combined line
-                if d1x != d2x || d1y != d2y {
-                    lines_to_add.push(vec![(d1x, d1y), (d2x, d2y)]);
-                }
+                start_x = d1x;
+                start_y = d1y;
+                end_x = d2x;
+                end_y = d2y;
             }
         }
-
         for line in lines_to_delete {
             self.delete_line(line[0].0, line[0].1, line[1].0, line[1].1);
         }
-
-        // Makes sure no points or duplicate lines are added
-        for line in &lines_to_add {
-            if (line[0].0 != line[1].0 || line[0].1 != line[1].1) && !self.lines.contains(&vec![(line[0].0, line[0].1),(line[1].0, line[1].1)]) && !self.lines.contains(&vec![(line[1].0, line[1].1),(line[0].0, line[0].1)]){
-                self.lines.push(line.clone());
-            }
-        }
-
         lines_to_delete = vec![];
         lines_to_add = vec![];
 
@@ -134,7 +124,7 @@ impl ShapeBuilder {
             }
         }
 
-        //no intersections (fix)
+        //no intersections
         if noInt {
             lines_to_add.push(vec![(start_x, start_y), (end_x, end_y)]);
         }
@@ -152,8 +142,16 @@ impl ShapeBuilder {
             if start_x < end_x {
                 intersections.sort_by(|a, b| a.0.partial_cmp(&b.0).expect("REASON"));
             }
-            else {
+            else if end_x < start_x{
                 intersections.sort_by(|a, b| b.0.partial_cmp(&a.0).expect("REASON"));
+            }
+            else {
+                if start_y < end_y {
+                    intersections.sort_by(|a, b| a.1.partial_cmp(&b.1).expect("REASON"));
+                }
+                else {
+                    intersections.sort_by(|a, b| b.1.partial_cmp(&a.1).expect("REASON"));
+                }
             }
             for i in 0..(intersections.len() - 1) {
                 lines_to_add.push(vec![(intersections[i].0, intersections[i].1), (intersections[i+1].0, intersections[i+1].1)]);
@@ -222,12 +220,15 @@ pub fn get_intersection(a1x: f64, a1y: f64, a2x: f64, a2y: f64, b1x: f64, b1y: f
     let alpha_num: f64 = ((b2x - b1x)*(b1y - a1y)) - ((b2y - b1y)*(b1x - a1x));
     let beta_num: f64 = ((a2x - a1x) * (b1y - a1y)) - ((a2y - a1y) * (b1x - a1x));
     let denom: f64 = ((b2x - b1x) * (a2y - a1y)) - ((b2y - b1y) * (a2x - a1x));
-    if denom == 0.0 {
+    if denom == 0.0 && alpha_num != 0.0 {
         //parallel but not intersecting
         return;
     }
     let alpha: f64 = alpha_num / denom;
     let beta: f64 = beta_num / denom;
+    log_f64(alpha_num);
+    log_f64(beta_num);
+    log_f64(denom);
     if alpha_num == 0.0 && denom == 0.0 {
         //collinear/overlapping lines
         *cx = f64::NEG_INFINITY;

@@ -16,8 +16,10 @@ function drawLine(line, color, ctx) {
 //Draws the grid
 function drawGrid(relativeScale, factor, offsetX, offsetY, ctx) {
   //drawing the light gray lines
+  //vertical lines
   for (let i = -16; i <= 16; i++) {
     let xPos = i * (50 * relativeScale) + offsetX % (50 * relativeScale) + 400;
+    let yPos = 322 + offsetY;
     drawLine([[xPos,-50],[xPos,650]], 'lightgray', ctx);
     let offset = offsetX;
     let shiftFactor = 0;
@@ -27,13 +29,21 @@ function drawGrid(relativeScale, factor, offsetX, offsetY, ctx) {
     }
     let num = (i + shiftFactor) * factor;
     ctx.font = "15px Arial";
-    let length = num.toString().length;
-    xPos -= 4 * length;
-    if (num == 0) {
-      xPos -= 6;
+    xPos -= ctx.measureText(num).width;
+    if (yPos > 590) {
+      yPos = 590;
+      ctx.fillStyle = "gray";
     }
-    ctx.fillText(num.toString(), xPos, 322 + offsetY);
+    else if (yPos < 20) {
+      yPos = 20;
+      ctx.fillStyle = "gray";
+    }
+    else {
+      ctx.fillStyle = "black";
+    }
+    ctx.fillText(num.toString(), xPos - 3, yPos);
   }
+  //horizontal lines
   for (let i = -12; i <= 12; i++) {
     let yPos = i * (50 * relativeScale) + offsetY % (50 * relativeScale) + 300;
     drawLine([[-50,yPos],[850,yPos]], 'lightgray', ctx);
@@ -45,10 +55,20 @@ function drawGrid(relativeScale, factor, offsetX, offsetY, ctx) {
     }
     let num = (i + shiftFactor) * factor * -1;
     ctx.font = "15px Arial";
-    let length = num.toString().length;
-    let xPos = 394 - 4 * length;
+    let xPos = 394 - ctx.measureText(num).width + offsetX;
+    if (xPos + ctx.measureText(num).width > 792) {
+      xPos = 792 - ctx.measureText(num).width;
+      ctx.fillStyle = "gray";
+    }
+    else if (xPos < 10) {
+      xPos = 10;
+      ctx.fillStyle = "gray";
+    }
+    else {
+      ctx.fillStyle = "black";
+    }
     if (num != 0) {
-      ctx.fillText(num.toString(), xPos + offsetX, yPos + 5);
+      ctx.fillText(num.toString(), xPos, yPos + 5);
     }
   }
 
@@ -78,6 +98,7 @@ function setActiveButton(buttonId) {
     selectedButton.classList.add('active');
   }
 }
+
 
 // Helper function that gets the distance squared from the cursor to any given line
 function distance2Line(ax, ay, bx, by, cx, cy) {
@@ -120,6 +141,11 @@ window.onload = async function() {
 
   //scale is used to keep track of the actual size of lines being drawn on the grid
   //relativeScale is used to size of the ticks and have them size appropriately
+
+  let mouseX = 0;
+  let mouseY = 0;
+
+  //These are exclusively used to globally track mouse position for the wheel event to use
 
   const canvas = document.getElementById('centroidCanvas');
   if(!canvas) {
@@ -165,6 +191,42 @@ window.onload = async function() {
     startX = null;
     startY = null;
   });
+  document.getElementById('drawNumLineButton').addEventListener('click', () => {
+    currentTool = 'drawLine';
+    console.log("Numerical Input Line Drawn");
+
+    // Set active class on selected tool and remove from others
+    setActiveButton('drawLineButton');
+    let valid = true;
+    let point1 = document.getElementById("linePoint1").value.replace("(","").replace(")","").replace(/\s + /g, "").split(",");
+    let point2 = document.getElementById("linePoint2").value.replace("(","").replace(")","").replace(/\s + /g, "").split(",");
+    
+    point1[0] = parseFloat(point1[0]);
+    point1[1] = parseFloat(point1[1]);
+    point2[0] = parseFloat(point2[0]);
+    point2[1] = parseFloat(point2[1]);
+    if (isNaN(point1[0]) || isNaN(point1[1])) {
+      document.getElementById("linePoint1").value = "INVALID INPUT";
+      valid = false;
+    }
+    if (isNaN(point2[0]) || isNaN(point2[1])) {
+      document.getElementById("linePoint2").value = "INVALID INPUT";
+      valid = false;
+    }
+    if (valid) {
+      shapeBuilder.add_line((point1[0] * 50) + 400, -(point1[1] * 50) + 300, (point2[0] * 50) + 400, -(point2[1] * 50) + 300);
+      document.getElementById("linePoint1").value = "";
+      document.getElementById("linePoint2").value = "";
+    }
+
+    // Redraw all lines and shapes
+    drawGrid(relativeScale, factor, gridOffsetX, gridOffsetY, ctx);
+    lines = JSON.parse(JSON.stringify(shapeBuilder.get_lines()));
+    lines.forEach(line => {
+      [line[0][0], line[0][1], line[1][0], line[1][1]] = [line[0][0] + gridOffsetX - (400 - line[0][0]) * (scale - 1), line[0][1] + gridOffsetY - (300 - line[0][1]) * (scale - 1), line[1][0] + gridOffsetX - (400 - line[1][0]) * (scale - 1), line[1][1] + gridOffsetY - (300 - line[1][1]) * (scale - 1)]
+      drawLine(line, 'black', ctx);
+    });
+  });
 
   document.getElementById('rectangleButton').addEventListener('click', function() {
     currentTool = 'drawRect';
@@ -174,6 +236,48 @@ window.onload = async function() {
     rectStartX = null;
     rectStartY = null;
   })
+
+  document.getElementById('drawNumRectButton').addEventListener('click', () => {
+    currentTool = 'drawRect';
+    setActiveButton('rectangleButton');
+    console.log("Rectangle Tool Selected");
+
+    let valid = true;
+    let point1 = document.getElementById("rectPoint1").value.replace("(","").replace(")","").replace(/\s + /g, "").split(",");
+    let width = document.getElementById("rectW").value;
+    let height = document.getElementById("rectH").value;
+    
+    point1[0] = parseFloat(point1[0]);
+    point1[1] = parseFloat(point1[1]);
+    width = parseFloat(width);
+    height = parseFloat(height);
+    if (isNaN(point1[0]) || isNaN(point1[1])) {
+      document.getElementById("rectPoint1").value = "INVALID INPUT";
+      valid = false;
+    }
+    if (isNaN(width)) {
+      document.getElementById("rectW").value = "INVALID";
+      valid = false;
+    }
+    if (isNaN(height)) {
+      document.getElementById("rectH").value = "INVALID";
+      valid = false;
+    }
+    if (valid) {
+      shapeBuilder.add_rect((point1[0] * 50) + 400, -(point1[1] * 50) + 300, ((point1[0] + width) * 50) + 400, -((point1[1] - height) * 50) + 300);
+      document.getElementById("rectPoint1").value = "";
+      document.getElementById("rectW").value = "";
+      document.getElementById("rectH").value = "";
+    }
+    // Redraw all lines and shapes
+    drawGrid(relativeScale, factor, gridOffsetX, gridOffsetY, ctx);
+    lines = JSON.parse(JSON.stringify(shapeBuilder.get_lines()));
+    lines.forEach(line => {
+      [line[0][0], line[0][1], line[1][0], line[1][1]] = [line[0][0] + gridOffsetX - (400 - line[0][0]) * (scale - 1), line[0][1] + gridOffsetY - (300 - line[0][1]) * (scale - 1), line[1][0] + gridOffsetX - (400 - line[1][0]) * (scale - 1), line[1][1] + gridOffsetY - (300 - line[1][1]) * (scale - 1)]
+      drawLine(line, 'black', ctx);
+    });
+  });
+
 
   document.getElementById('deleteLineButton').addEventListener('click', function() {
     currentTool = 'deleteLine';
@@ -257,7 +361,7 @@ window.onload = async function() {
       lines = JSON.parse(JSON.stringify(shapeBuilder.get_lines()));
       lines.forEach(line => {
         let distance2 = distance2Line(line[0][0] + gridOffsetX - (400 - line[0][0]) * (scale - 1), line[0][1] + gridOffsetY - (300 - line[0][1]) * (scale - 1), line[1][0] + gridOffsetX - (400 - line[1][0]) * (scale - 1), line[1][1] + gridOffsetY - (300 - line[1][1]) * (scale - 1), e.offsetX, e.offsetY);
-        if (distance2 <= 40) {
+        if (distance2 <= 35) {
           shapeBuilder.delete_line(line[0][0], line[0][1], line[1][0], line[1][1]);
           console.log("Line deleted:", line[0][0], line[0][1], line[1][0], line[1][1]);
         }
@@ -268,8 +372,8 @@ window.onload = async function() {
   canvas.addEventListener('mousemove', function (e) {
     const endX = e.offsetX;
     const endY = e.offsetY;
-
-    //console.log("Mouse move:", endX, endY);
+    mouseX = e.offsetX;
+    mouseY = e.offsetY;
 
     // Clear the canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -291,20 +395,39 @@ window.onload = async function() {
 
     if (currentTool === 'select' && !gridShift) {
       lines = JSON.parse(JSON.stringify(shapeBuilder.get_lines()));
+      let drawnCoords = [];
       lines.forEach(line => {
+        let [actualX0, actualY0, actualX1, actualY1] = [line[0][0], line[0][1], line[1][0], line[1][1]];
         [line[0][0], line[0][1], line[1][0], line[1][1]] = [line[0][0] + gridOffsetX - (400 - line[0][0]) * (scale - 1), line[0][1] + gridOffsetY - (300 - line[0][1]) * (scale - 1), line[1][0] + gridOffsetX - (400 - line[1][0]) * (scale - 1), line[1][1] + gridOffsetY - (300 - line[1][1]) * (scale - 1)]
         let distance2A = distance2Point(line[0][0], line[0][1], e.offsetX, e.offsetY);
         let distance2B = distance2Point(line[1][0], line[1][1], e.offsetX, e.offsetY);
         let distance2 = distance2Line(line[0][0], line[0][1], line[1][0], line[1][1], e.offsetX, e.offsetY);
-        if (distance2A <= 30) {
+        if (distance2A <= 40) {
+          //highlights vertex and displays coordinates
           drawVertex(line[0][0], line[0][1], 'yellow', ctx);
-          //once coordinates are developed, add the display of the point's position
-        } else if (distance2B <= 30) {
+          let xPos = (actualX0 - 400) / 50;
+          let yPos = (actualY0 - 300) / -50;
+          ctx.fillStyle = "black";
+          if (!drawnCoords.includes((xPos, yPos))) {
+            ctx.fillText("(" + xPos.toString() + ", " + yPos.toString() + ")", line[0][0] + 11, line[0][1] - 4);
+            drawnCoords.push((xPos, yPos));
+          }
+        } else if (distance2B <= 40) {
           drawVertex(line[1][0], line[1][1], 'yellow', ctx);
-          //once coordinates are developed, add the display of the point's position
-        } else if (distance2 <= 40) {
-          drawLine(line, 'yellow', ctx)
-          //once coordinates are developed, add the display of the length of the line
+          let xPos = (actualX1 - 400) / 50;
+          let yPos = (actualY1 - 300) / -50;
+          ctx.fillStyle = "black";
+          if (!drawnCoords.includes((xPos, yPos))) {
+            ctx.fillText("(" + xPos.toString() + ", " + yPos.toString() + ")", line[1][0] + 11, line[1][1] - 4);
+            drawnCoords.push((xPos, yPos));
+          }
+        } else if (distance2 <= 35) {
+          //highlights line and displays length
+          let [xPos0, yPos0, xPos1, yPos1] = [(actualX0 - 400) / 50, (actualY0 - 300) / -50, (actualX1 - 400) / 50, (actualY1 - 300) / -50];
+          let actualDistance = ((xPos0 - xPos1)**2 + (yPos0 - yPos1)**2)**0.5;
+          ctx.fillStyle = "black";
+          ctx.fillText("len = " + actualDistance.toString(), (line[0][0] + line[1][0])/2 + 5, (line[0][1] + line[1][1])/2 - 5);
+          drawLine(line, 'yellow', ctx);
         }
       });
     }
@@ -345,7 +468,7 @@ window.onload = async function() {
       lines.forEach(line => {
         [line[0][0], line[0][1], line[1][0], line[1][1]] = [line[0][0] + gridOffsetX - (400 - line[0][0]) * (scale - 1), line[0][1] + gridOffsetY - (300 - line[0][1]) * (scale - 1), line[1][0] + gridOffsetX - (400 - line[1][0]) * (scale - 1), line[1][1] + gridOffsetY - (300 - line[1][1]) * (scale - 1)]
         let distance2 = distance2Line(line[0][0], line[0][1], line[1][0], line[1][1], e.offsetX, e.offsetY);
-        if (distance2 <= 40) {
+        if (distance2 <= 35) {
           drawLine(line, 'red', ctx)
         }
       });
@@ -399,9 +522,9 @@ window.onload = async function() {
 
 
   // Adding a scroll zoom feature to the grid similar to Desmos
-  canvas.addEventListener('wheel', function (scroll) {
+  canvas.addEventListener('wheel', function (e) {
     //scroll down: zoom out
-    if (scroll.deltaY > 0) {
+    if (e.deltaY > 0 && !isDrawing) {
       let prevScale = scale;  
       scale /= 1 * 2**(1/10);
       relativeScale /= 1 * 2**(1/10);
@@ -409,9 +532,11 @@ window.onload = async function() {
         relativeScale = 1 * 2**(9/10);
         factor *= 2;
       }
+      gridOffsetX -= (mouseX - 400 - gridOffsetX) * (1 - (1 * 2**(1/10)));
+      gridOffsetY -= (mouseY - 300 - gridOffsetY) * (1 - (1 * 2**(1/10))); 
     }
     //scroll up: zoom in
-    if (scroll.deltaY < 0) {
+    if (e.deltaY < 0 && !isDrawing) {
       let prevScale = scale;  
       scale *= 1 * 2**(1/10);
       relativeScale *= 1 * 2**(1/10);
@@ -419,16 +544,19 @@ window.onload = async function() {
         relativeScale = 1;
         factor /= 2;
       }
+      gridOffsetX += (mouseX - 400 - gridOffsetX) * (1 - (1 * 2**(1/10)));
+      gridOffsetY += (mouseY - 300 - gridOffsetY) * (1 - (1 * 2**(1/10))); 
     }
-    console.log(relativeScale);
-    //redraw all the lines
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawGrid(relativeScale, factor, gridOffsetX, gridOffsetY, ctx);
-    lines = JSON.parse(JSON.stringify(shapeBuilder.get_lines()));
-    lines.forEach(line => {
-      [line[0][0], line[0][1], line[1][0], line[1][1]] = [line[0][0] + gridOffsetX - (400 - line[0][0]) * (scale - 1), line[0][1] + gridOffsetY - (300 - line[0][1]) * (scale - 1), line[1][0] + gridOffsetX - (400 - line[1][0]) * (scale - 1), line[1][1] + gridOffsetY - (300 - line[1][1]) * (scale - 1)]
-      drawLine(line, 'black', ctx);
-    });
+    if (!isDrawing) {
+      //redraw all the lines
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawGrid(relativeScale, factor, gridOffsetX, gridOffsetY, ctx);
+      lines = JSON.parse(JSON.stringify(shapeBuilder.get_lines()));
+      lines.forEach(line => {
+        [line[0][0], line[0][1], line[1][0], line[1][1]] = [line[0][0] + gridOffsetX - (400 - line[0][0]) * (scale - 1), line[0][1] + gridOffsetY - (300 - line[0][1]) * (scale - 1), line[1][0] + gridOffsetX - (400 - line[1][0]) * (scale - 1), line[1][1] + gridOffsetY - (300 - line[1][1]) * (scale - 1)]
+        drawLine(line, 'black', ctx);
+      });
+    }
   });
   // =======================[ END MOUSE EVENTS ]==================================
   
