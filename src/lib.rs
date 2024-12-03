@@ -3,14 +3,11 @@ use wasm_bindgen::JsValue;
 use serde::{Serialize, Deserialize};
 use serde_wasm_bindgen::to_value;
 
-#[wasm_bindgen]
-#[derive(Serialize, Deserialize, Clone)]
-pub struct ShapeBuilder {
-    lines: Vec<Vec<(f64, f64)>>,
-}
-
+// Logging functions for Wasm targets. Pushes error messages to web console via Javascript.
+#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 extern "C" {
+
     #[wasm_bindgen(js_namespace = console, js_name = log)]
         fn log(s: &str);
         //log a vector to console: log(&format!("{:?}", line));
@@ -22,6 +19,32 @@ extern "C" {
         fn log_f64(a: f64);
 }
 
+// Define mock logging functions for non-Wasm targets
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(unused)]
+fn log(s: &str) {
+    println!("{}", s);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(unused)]
+fn log_usize(a: usize) {
+    println!("{}", a);
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+#[allow(unused)]
+fn log_f64(a: f64) {
+    println!("{}", a);
+}
+
+// Core code for creating and storing shapes
+#[wasm_bindgen]
+#[derive(Serialize, Deserialize, Clone)]
+pub struct ShapeBuilder {
+    lines: Vec<Vec<(f64, f64)>>,
+}
+
 #[wasm_bindgen]
 impl ShapeBuilder {    
     // Create new instance
@@ -29,6 +52,7 @@ impl ShapeBuilder {
         ShapeBuilder {lines: Vec::new()}
     }
 
+    // Deletes a given line from the shape
     pub fn delete_line(&mut self, a1x: f64, a1y: f64, a2x: f64, a2y: f64) {
         let oldLineA = vec![(a1x, a1y), (a2x, a2y)];
         let oldLineB = vec![(a2x, a2y), (a1x, a1y)];
@@ -43,7 +67,7 @@ impl ShapeBuilder {
         let mut lines_to_add = Vec::new();
         let mut lines_to_process: Vec<Vec<(f64, f64)>> = Vec::new(); // Track lines to be processed
 
-        //Checks for collinearity
+        // Start collinearity and intersection detection
         for line in &self.lines {
 
             if line.len() < 2 {
@@ -172,6 +196,8 @@ impl ShapeBuilder {
 
     }
 
+    // add_rect: Given two vertices that are diagonally opposite in the rectangle, (top left and bottom right used for ease of design)
+    // Calculates and adds a series of lines that make up said rectangle.
     pub fn add_rect(&mut self, top_left_x: f64, top_left_y: f64, bottom_right_x: f64, bottom_right_y: f64) {
         let top_right_x = bottom_right_x;
         let top_right_y = top_left_y;
