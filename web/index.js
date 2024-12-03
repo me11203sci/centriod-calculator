@@ -313,7 +313,13 @@ window.onload = async function() {
       console.log('Centroid: ', centroid);
 
       // Draw the centroid on the canvas
-      drawVertex(centroid[0] + gridOffsetX, centroid[1] + gridOffsetY, 'red', ctx);
+      let actualX0 = centroid[0] + gridOffsetX - (400 - centroid[0]) * (scale - 1);
+      let actualY0 = centroid[1] + gridOffsetY - (300 - centroid[1]) * (scale - 1);
+      drawVertex(actualX0, actualY0, 'red', ctx);
+      ctx.fillStyle = "red";
+      let xPos = (actualX0 - gridOffsetX - 400) / 50;
+      let yPos = (actualY0 - gridOffsetY - 300) / -50;
+      ctx.fillText("(" + xPos.toString() + ", " + yPos.toString() + ")", actualX0 + 11, actualY0 - 4);
     }
     else {
       console.log("Centroid calculation failed or insufficient points.")
@@ -426,7 +432,7 @@ window.onload = async function() {
           let [xPos0, yPos0, xPos1, yPos1] = [(actualX0 - 400) / 50, (actualY0 - 300) / -50, (actualX1 - 400) / 50, (actualY1 - 300) / -50];
           let actualDistance = ((xPos0 - xPos1)**2 + (yPos0 - yPos1)**2)**0.5;
           ctx.fillStyle = "black";
-          ctx.fillText("len = " + actualDistance.toString(), (line[0][0] + line[1][0])/2 + 5, (line[0][1] + line[1][1])/2 - 5);
+          ctx.fillText("len = " + actualDistance.toString(), e.offsetX + 5, e.offsetY - 5);
           drawLine(line, 'yellow', ctx);
         }
       });
