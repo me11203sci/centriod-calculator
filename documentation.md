@@ -95,8 +95,8 @@ pub fn add_line(&mut self, mut start_x: f64, mut start_y: f64, mut end_x: f64, m
     
 - **Process**:
     
-    - Detects intersections with existing lines and splits lines as needed.
     - Resolves collinearity by merging overlapping lines into a single line.
+    - Detects intersections with existing lines and splits lines as needed.
     - Removes old lines and adds new ones.
 
 #### `add_rect`
@@ -835,7 +835,7 @@ function drawGrid(relativeScale, factor, offsetX, offsetY, ctx) {
 
 - **Purpose**: Draws the grid lines (both horizontal and vertical) on the canvas, including the main axes and labels.
 - **Parameters**:
-    - `relativeScale`: Scale of the grid (used for zooming).
+    - `relativeScale`: Scale of the grid lines (used to increase or decrease the number of grid lines as the user zooms in or out respectively).
     - `factor`: Factor used for grid labels (e.g., scale factor for numerical labels).
     - `offsetX`, `offsetY`: Offsets to shift the grid.
     - `ctx`: The 2D context of the canvas for drawing.
